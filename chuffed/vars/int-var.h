@@ -120,6 +120,14 @@ public:
 	void setPreferredVal(PreferredVal p) { preferred_val = p; }
 	DecInfo* branch();
 
+	bool best_sol_value_set; //these two variables are used in the best solution phasing approach
+	int value_in_best_solution;
+
+	bool hot_started;
+
+	void saveVariableAssignment();
+	void hotStart(int val);
+
 //--------------------------------------------------
 // Type specialisation
 

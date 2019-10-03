@@ -206,6 +206,36 @@ namespace FlatZinc {
         }
     }
 
+
+    // Parsing the 'int_search' annotation and setting up the branching for it
+    void FlatZincSpace::parseSolveAnnHotStart(AST::Node* elemAnn, BranchGroup* branching, int& nbNonEmptySearchAnnotations) {
+        assert(elemAnn->isCall("hot_start"));
+        try {
+            // Retrieval of the data
+		
+            AST::Call *call = elemAnn->getCall("hot_start");
+            if (!so.hot_start_enabled) {
+                fprintf(stderr, "Hot start detected, but turned off. Ignoring!\n");
+            } else {
+                AST::Array *args = call->getArgs(2);
+                AST::Array *variables = args->a[0]->getArray();
+                AST::Array *values = args->a[1]->getArray();
+
+                for (int i = 0; i < variables->a.size(); i++) {
+                    int val = values->a[i]->getInt();
+                    IntVar *var = iv[variables->a[i]->getIntVar()];
+                    var->hotStart(val);
+                }
+
+		nbNonEmptySearchAnnotations++;
+            }
+
+
+            
+        } catch (AST::TypeError& e) {
+            throw FlatZinc::Error("Type error in hot_start annotation", e.what());
+        }
+    }
     
     // Parsing the 'int_search' annotation and setting up the branching for it
     void FlatZincSpace::parseSolveAnnIntSearch(AST::Node* elemAnn, BranchGroup* branching, int& nbNonEmptySearchAnnotations) {
@@ -303,6 +333,9 @@ namespace FlatZinc {
     void FlatZincSpace::parseSolveAnnAux(AST::Node* elemAnn, BranchGroup* branching, int& nbNonEmptySearchAnnotations) {
         if (elemAnn->isCall("int_search")) {
             parseSolveAnnIntSearch(elemAnn, branching, nbNonEmptySearchAnnotations);
+        }
+        else if (elemAnn->isCall("hot_start")) {
+            parseSolveAnnHotStart(elemAnn, branching, nbNonEmptySearchAnnotations);
         }
         else if (elemAnn->isCall("bool_search")) {
             parseSolveAnnBoolSearch(elemAnn, branching, nbNonEmptySearchAnnotations);

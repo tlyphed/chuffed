@@ -100,6 +100,7 @@ public:
 	vec<double> activity;                  // A heuristic measurement of the activity of a variable.
 	Heap<VarOrderLt> order_heap;           // A priority queue of variables ordered with respect to the variable activity.
 	vec<bool> polarity;
+	vec<lbool> value_in_best_solution;	//for the best solution phasing approach; the i-th variable has the value_in_best_solution[i] value in the best solution; undef when no solution found so far
 
 	void insertVarOrder(int x);            // Insert a variable in the decision order priority queue.
 	void varDecayActivity();               // Decay all variables with the specified factor. Implemented by increasing the 'bump' value instead.
@@ -158,6 +159,7 @@ public:
 	bool finished();
 	double getScore(VarBranch vb) { NEVER; }
 	DecInfo* branch();
+	void saveVariableAssignments(); //used for best solution phase saving approach
 
 	// Parallel methods
 

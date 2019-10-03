@@ -288,6 +288,16 @@ inline bool Engine::constrain() {
     best_sol = opt_var->getVal();
     opt_time = std::chrono::duration_cast<duration>(chuffed_clock::now() - start_time) - init_time;
 
+
+    if (so.phasing_best_solution) { //update the best solution for each variable
+        this->saveBestSolution();
+    }
+
+    if (so.phasing_best_solution && should_remove_assumptions) { //hot start phase complete, remove assumptions are proceed normally
+        assumptions.resize(0);
+        should_remove_assumptions = false;
+    }
+
     sat.btToLevel(0);
     restart_count++;
     nodepath.resize(0);
@@ -319,6 +329,13 @@ inline bool Engine::constrain() {
 
     /* return (opt_type ? opt_var->setMin(best_sol+1) : opt_var->setMax(best_sol-1)); */
     return true;
+}
+
+void Engine::saveBestSolution() { //used for the best solution phasing approach
+    sat.saveVariableAssignments();
+    for (int i = 0; i < vars.size(); i++) {
+        vars[i]->saveVariableAssignment();
+    }
 }
 
 bool Engine::propagate() {
@@ -520,6 +537,22 @@ RESULT Engine::search(const std::string& problemLabel) {
     decisionLevelTip.push_back(1);
 
     /* boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::universal_time(); */
+
+    //push into assumptions
+    // foreach intvar > assumptions.push(toInt(intvar.getLit(val,1 )
+    initial_assumption_size = assumptions.size();
+    should_remove_assumptions = true;
+    assert(initial_assumption_size == 0); //as a quick solution, for now I will assume that assumptions are empty
+    if (so.hot_start_enabled) { //check for hot starts -> later on this might be its own flag which tells whether hot starts should be considered
+        for (int i = 0; i < vars.size(); i++) {
+            IntVar *var = vars[i];
+            if (var->best_sol_value_set) {
+                int &val = var->value_in_best_solution;
+                assumptions.push(toInt(var->getLit(val, 1)));
+            }
+        }
+    }
+    
 
     while (true) {
         if (so.parallel && slave.checkMessages()) return RES_UNK;

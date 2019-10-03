@@ -121,6 +121,7 @@ int SAT::newVar(int n, ChannelInfo ci) {
 	activity .growBy(n, 0);
 	polarity .growBy(n, 1);
 	flags    .growBy(n, 7);
+	value_in_best_solution.growBy(n, l_Undef);
 
 	for (int i = 0; i < n; i++) {
 		c_info.push(ci);
@@ -596,7 +597,32 @@ DecInfo* SAT::branch() {
 	assert(!assigns[next]);
 	assert(flags[next].decidable);
 
+	if (so.phasing_best_solution) {
+		assert(next < sat.value_in_best_solution.size()); //there should be a value for "next"
+		if (sat.value_in_best_solution[next] != l_Undef) { //if there is a value for "next", use it. Otherwise, do the default strategy below
+			if (sat.value_in_best_solution[next] == l_True) {
+				return new DecInfo(NULL, 2 * next);
+			}
+			else { // sat.value_in_best_solution[v] == l_False
+				return new DecInfo(NULL, 2 * next + 1);
+			}
+		}
+	}
+
 	return new DecInfo(NULL, 2*next+polarity[next]);
+}
+
+void SAT::saveVariableAssignments() {
+	assert(assigns.size() == value_in_best_solution.size());
+	for (int i = 0; i < assigns.size(); i++) {
+		assert(assigns[i] != toInt(l_Undef)); //in the solution all variables must be assigned values - maybe not for variables no longer used in clauses, can this happen?
+		if (assigns[i] == toInt(l_True)) {
+			value_in_best_solution[i] = l_True;
+		}
+		else {
+			value_in_best_solution[i] = l_False;
+		}
+	}
 }
 
 //-----

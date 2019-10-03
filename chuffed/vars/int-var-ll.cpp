@@ -31,6 +31,12 @@ IntVarLL::IntVarLL(const IntVar& other) : IntVar(other), ld(2), li(0), hi(1) {
 }
 
 DecInfo* IntVarLL::branch() {
+
+	if (so.phasing_best_solution && best_sol_value_set && indomain(value_in_best_solution)) {
+		return new DecInfo(this, value_in_best_solution, 1); //what is this last parameter "type"?
+	} //else, resort to default strategies
+
+
 	switch (preferred_val) {
 		case PV_MIN: return new DecInfo(this, min, 3);
 		case PV_MAX: return new DecInfo(this, max-1, 2);

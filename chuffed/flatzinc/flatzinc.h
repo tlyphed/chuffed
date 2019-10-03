@@ -436,6 +436,7 @@ namespace FlatZinc {
         void parseSolveAnn(AST::Array* ann, BranchGroup* branching, int& nbNonEmptySearchAnnotations);
         void parseSolveAnnAux(AST::Node* elemAnn, BranchGroup* branching, int& nbNonEmptySearchAnnotations);
         void parseSolveAnnIntSearch(AST::Node* elemAnn, BranchGroup* branching, int& nbNonEmptySearchAnnotations);
+        void parseSolveAnnHotStart(AST::Node* elemAnn, BranchGroup* branching, int& nbNonEmptySearchAnnotations);
         void parseSolveAnnBoolSearch(AST::Node* elemAnn, BranchGroup* branching, int& nbNonEmptySearchAnnotations);
         void parseSolveAnnPrioritySearch(AST::Node* elemAnn, BranchGroup* branching, int& nbNonEmptySearchAnnotations);
     };

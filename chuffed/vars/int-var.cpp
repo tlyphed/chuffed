@@ -30,6 +30,9 @@ IntVar::IntVar(int _min, int _max) :
   , preferred_val(PV_MIN)
   , activity(0)
   , in_queue(false)
+  , best_sol_value_set(false)
+  , hot_started(false)
+  , value_in_best_solution(INT32_MAX)
 {
 	assert(min_limit <= min && min <= max && max <= max_limit);
 	engine.vars.push(this);
@@ -183,10 +186,30 @@ double IntVar::getScore(VarBranch vb) {
 	}
 }
 
+
+void IntVar::saveVariableAssignment() {
+	assert(so.phasing_best_solution);
+	best_sol_value_set = true;
+	value_in_best_solution = getVal();
+}
+
+void IntVar::hotStart(int val) {
+	//assert(so.phasing_best_solution);
+	assert(best_sol_value_set == false || val == value_in_best_solution); //it could be that a variable is hot started multiple times, but each time it must called with the same value
+	best_sol_value_set = true;
+	assert(indomain(val));
+	value_in_best_solution = val;
+}
+
 DecInfo* IntVar::branch() {
 //	vec<int> possible;
 //	for (int i = min; i <= max; i++) if (indomain(i)) possible.push(i);
 //	return new DecInfo(this, possible[rand()%possible.size()], 1);
+
+
+	if (so.phasing_best_solution && best_sol_value_set && indomain(value_in_best_solution) ) {
+		return new DecInfo(this, value_in_best_solution, 1); //what is this last parameter "type"?
+	} //else, resort to default strategies
 
 
 	switch (preferred_val) {

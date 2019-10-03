@@ -54,6 +54,9 @@ public:
 
     // Decision stack
     vec<DecInfo> dec_info;
+    void saveBestSolution(); //used for the best solution phasing approach
+    int initial_assumption_size;
+    bool should_remove_assumptions;
 
     // Trails
     vec<TrailElem> trail;           // Raw data changes

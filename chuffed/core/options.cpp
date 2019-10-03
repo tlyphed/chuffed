@@ -24,6 +24,8 @@ Options::Options() :
 	, branch_random(false)
 	, switch_to_vsids_after(1000000000)
 	, sat_polarity(0)
+  , phasing_best_solution(false)
+  , hot_start_enabled(false)
 
 	, prop_fifo(false)
 
@@ -302,6 +304,12 @@ void printLongHelp(int& argc, char**& argv, const std::string& fileExt) {
   "  --sat-polarity <n>\n"
   "     Selection of the polarity of Boolean variables\n"
   "     (0 = default, 1 = same, 2 = anti, 3 = random) (default " << def.sat_polarity << ").\n"
+  "  --phasing_best_sol [on|off]\n"
+  "     When deciding which value to assign to an unassigned variable, assigns the value that the variable had in the best solution found so far.\n"
+  "     (default " << (def.phasing_best_solution ? "on" : "off") << ").\n"
+  "  --hot_start_enabled [on|off]\n"
+  " When disabled, ignores hot start variable assignments."
+  " (default " << (def.hot_start_enabled ? "on" : "off") << ").\n"
   "\n"
   "Learning Options:\n"
   "  --lazy [on|off], --no-lazy\n"
@@ -504,6 +512,11 @@ void parseOptions(int& argc, char**& argv, std::string* fileArg, const std::stri
       so.switch_to_vsids_after = intBuffer;
     } else if (cop.get("--sat-polarity", &intBuffer)) {
       so.sat_polarity = intBuffer;
+    } else if (cop.getBool("--phasing_best_sol", boolBuffer)) {
+      so.phasing_best_solution = boolBuffer;
+    }
+    else if (cop.getBool("--hot_start_enabled", boolBuffer)) {
+      so.hot_start_enabled = boolBuffer;
     } else if (cop.getBool("--prop-fifo", boolBuffer)) {
       so.prop_fifo = boolBuffer;
     } else if (cop.getBool("--disj-edge-find", boolBuffer)) {
